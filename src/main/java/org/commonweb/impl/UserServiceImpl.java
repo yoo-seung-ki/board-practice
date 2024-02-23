@@ -23,9 +23,13 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
+    public User updateUser(String userId,User user) {
+        return userRepository.
+    }
+
     @Override
-    public Optional<User> findUserById(Long id) {
-        return userRepository.findById(id);
+    public Optional<User> findByUserId(String userId) {
+        return userRepository.findByUserId(userId);
     }
 
     @Override

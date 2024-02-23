@@ -67,19 +67,19 @@ class UserServiceTest {
     }
 
     @Test
-    void findUserByIdTest() {
-        Long userId = 1L;
+    void findByUserIdTest() {
+        String userId = "testUserId";
         User mockUser = User.builder()
-                .id(userId)
+                .id(1L)
                 .userId("testUserid")
                 .password("testPassword")
                 .email("testEmail")
                 .name("testName")
                 .phoneNumber("testPhoneNumber")
                 .build();
-        when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+        when(userRepository.findByUserId(userId)).thenReturn(Optional.of(mockUser));
 
-        Optional<User> foundUserOpt  = userService.findUserById(userId);
+        Optional<User> foundUserOpt  = userService.findByUserId(userId);
 
         assertTrue(foundUserOpt.isPresent(), "User should be found");
         foundUserOpt.ifPresent(foundUser -> {

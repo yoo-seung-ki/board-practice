@@ -40,4 +40,12 @@ public class User {
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime userUpdatedAt;
+
+    public void updateUserInfo(String userId, String password, String name, String email, String phoneNumber) {
+        if (userId != null) this.userId = userId;
+        if (password != null) this.password = password;
+        if (name != null) this.name = name;
+        if (email != null) this.email = email;
+        if (phoneNumber != null) this.phoneNumber = phoneNumber;
+    }
 }
