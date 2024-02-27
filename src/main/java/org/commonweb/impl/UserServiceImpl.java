@@ -1,6 +1,7 @@
 package org.commonweb.impl;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.commonweb.dto.request.UserUpdateRequest;
 import org.commonweb.entity.User;
 import org.commonweb.repository.UserRepository;
 import org.commonweb.service.UserService;
@@ -23,8 +24,17 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
-    public User updateUser(String userId,User user) {
-        return userRepository.
+    public User updateUser(String userId, UserUpdateRequest updateRequest) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+
+        user.updateUserInfo(
+                updateRequest.getUserId(),
+                updateRequest.getPassword(),
+                updateRequest.getEmail(),
+                updateRequest.getName(),
+                updateRequest.getPhoneNumber());
+        return userRepository.save(user);
     }
 
     @Override

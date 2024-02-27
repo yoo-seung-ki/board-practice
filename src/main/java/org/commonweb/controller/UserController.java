@@ -1,6 +1,8 @@
 package org.commonweb.controller;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.commonweb.dto.request.UserUpdateRequest;
+import org.commonweb.dto.response.UserResponse;
 import org.commonweb.entity.User;
 import org.commonweb.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +23,10 @@ public class UserController {
     }
 
     @PostMapping("/users")
-    public ResponseEntity<User> createUser(@RequestBody User user) {
+    public ResponseEntity<UserResponse > createUser(@RequestBody User user) {
         User savedUser = userService.saveUser(user);
-        return ResponseEntity.ok(savedUser);
+        UserResponse userResponse = convertToUserResponse(savedUser); // User 객체를 UserResponse 객체로 변환
+        return ResponseEntity.ok(userResponse);
     }
 
     @GetMapping("/users/{userId}")
@@ -40,8 +43,22 @@ public class UserController {
     }
 
     @PutMapping("/users/{userId}")
-    public ResponseEntity<User> updateUser(@PathVariable String userId, @RequestBody User user) {
-        User updatedUser = userService.updateUser(userId, user);
-        return ResponseEntity.ok(updatedUser);
+    public ResponseEntity<UserResponse> updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest updateRequest) {
+        // UserUpdateRequest DTO를 사용하여 사용자 정보 업데이트 로직 수행
+        User updatedUser = userService.updateUser(userId, updateRequest);
+
+        // UserResponse DTO를 생성하여 응답
+        UserResponse userResponse = convertToUserResponse(updatedUser);
+        return ResponseEntity.ok(userResponse);
+    }
+
+    private UserResponse convertToUserResponse(User user) {
+        UserResponse userResponse = new UserResponse();
+        userResponse.setUserId(user.getUserId());
+        userResponse.setName(user.getName());
+        userResponse.setEmail(user.getEmail());
+        userResponse.setPhoneNumber(user.getPhoneNumber());
+        // 추가적으로, User 엔티티의 다른 필드들도 여기에 매핑할 수 있습니다.
+        return userResponse;
     }
 }
