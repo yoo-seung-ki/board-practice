@@ -35,4 +35,11 @@ public class Post {
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    public void updateInfo(String title, String content, LocalDateTime updatedAt) {
+        this.title = title;
+        this.content = content;
+        this.updatedAt = updatedAt;
+        // 기타 업데이트할 필드가 있다면 여기에 추가
+    }
 }

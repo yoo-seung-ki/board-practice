@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
+
     Page<Post> findByUser_UserId(String userId, Pageable pageable); // 특정 사용자 ID로 게시글 리스트 찾기
     Page<Post> findByTitleContaining(String title, Pageable pageable); // 제목에 특정 키워드가 포함된 게시글 찾기
     Page<Post> findByContentContaining(String content, Pageable pageable);

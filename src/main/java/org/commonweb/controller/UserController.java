@@ -1,11 +1,14 @@
 package org.commonweb.controller;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.commonweb.dto.request.UserCreationRequest;
 import org.commonweb.dto.request.UserUpdateRequest;
 import org.commonweb.dto.response.UserResponse;
 import org.commonweb.entity.User;
 import org.commonweb.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,22 +26,23 @@ public class UserController {
     }
 
     @PostMapping("/users")
-    public ResponseEntity<UserResponse > createUser(@RequestBody User user) {
-        User savedUser = userService.saveUser(user);
-        UserResponse userResponse = convertToUserResponse(savedUser); // User 객체를 UserResponse 객체로 변환
-        return ResponseEntity.ok(userResponse);
+    public ResponseEntity<UserResponse> createUser(@RequestBody UserCreationRequest creationRequest) {
+        User savedUser = userService.createUserFromRequest(creationRequest);
+        UserResponse userResponse = convertToUserResponse(savedUser);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
     }
 
     @GetMapping("/users/{userId}")
-    public ResponseEntity<User> getUserByUserId(@PathVariable String userId) {
+    public ResponseEntity<UserResponse> getUserByUserId(@PathVariable String userId) {
         User user = userService.findByUserId(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with userId: " + userId));
-        return ResponseEntity.ok(user);
+        UserResponse userResponse = convertToUserResponse(user);
+        return ResponseEntity.ok(userResponse);
     }
 
     @GetMapping("/users")
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
+    public ResponseEntity<Page<User>> getAllUsers(Pageable pageable) {
+        Page<User> users = userService.getAllUsers(pageable);
         return ResponseEntity.ok(users);
     }
 

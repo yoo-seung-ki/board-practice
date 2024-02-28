@@ -2,6 +2,8 @@ package org.commonweb.impl;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.commonweb.dto.request.PostCreationRequest;
+import org.commonweb.dto.request.PostUpdateRequest;
 import org.commonweb.entity.Post;
 import org.commonweb.repository.PostRepository;
 import org.commonweb.service.PostService;
@@ -10,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -21,11 +24,6 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Post savePost(Post post) {
-        return postRepository.save(post);
-    }
-
-    @Override
     public void deletePostById(Long id) {
         if (!postRepository.existsById(id)) {
             throw new EntityNotFoundException("Post not found with id: " + id);
@@ -33,10 +31,6 @@ public class PostServiceImpl implements PostService {
         postRepository.deleteById(id);
     }
 
-    /*@Override
-    public Post findPostById(Long id, Pageable pageable) {
-        return postRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Post not found with id: " + id));
-    }*/
 
     @Override
     public Page<Post> getAllPosts(Pageable pageable) {
@@ -46,6 +40,10 @@ public class PostServiceImpl implements PostService {
     @Override
     public Page<Post> searchPostsByUserId(String userId, Pageable pageable) {
         return postRepository.findByUser_UserId(userId, pageable);
+    }
+
+    public Optional<Post> searchPostById(Long id) {
+        return postRepository.findById(id);
     }
 
     @Override
@@ -67,4 +65,27 @@ public class PostServiceImpl implements PostService {
     public Page<Post> searchPostsByTitleOrContent(String keyword, Pageable pageable) {
         return postRepository.findByTitleOrContent(keyword, pageable);
     }
+
+    public Post createPost(PostCreationRequest request) {
+        Post post = Post.builder()
+                .id(request.getId())
+                .title(request.getTitle())
+                .content(request.getContent())
+                .user(request.getUser())
+                .createdAt(request.getCreatedAt())
+                .updatedAt(request.getUpdatedAt())
+                .build();
+        // 필요한 경우, 추가적인 필드 설정
+        return postRepository.save(post);
+    }
+
+    public Post updatePost(Long postId, PostUpdateRequest request) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new EntityNotFoundException("Post not found with id: " + postId));
+
+        post.updateInfo(request.getTitle(), request.getContent(), request.getUpdatedAt());
+        // post.setUpdatedAt(LocalDateTime.now()); // 필요하다면 업데이트 시간 설정
+        return postRepository.save(post);
+    }
+
 }

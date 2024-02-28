@@ -1,10 +1,13 @@
 package org.commonweb.impl;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.commonweb.dto.request.UserCreationRequest;
 import org.commonweb.dto.request.UserUpdateRequest;
 import org.commonweb.entity.User;
 import org.commonweb.repository.UserRepository;
 import org.commonweb.service.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,11 +20,6 @@ public class UserServiceImpl implements UserService {
 
     public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
-    }
-
-    @Override
-    public User saveUser(User user) {
-        return userRepository.save(user);
     }
 
     public User updateUser(String userId, UserUpdateRequest updateRequest) {
@@ -43,8 +41,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public Page<User> getAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable);
     }
 
     @Override
@@ -55,6 +53,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<User> findByPhoneNumber(String phoneNumber) {
         return userRepository.findByPhoneNumber(phoneNumber);
+    }
+
+    public User createUserFromRequest(UserCreationRequest request) {
+        User user = User.builder()
+                .userId(request.getUserId())
+                .password(request.getPassword())
+                .email(request.getEmail())
+                .name(request.getName())
+                .phoneNumber(request.getPhoneNumber())
+                .build();
+        return userRepository.save(user);
     }
 
 }

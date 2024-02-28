@@ -3,6 +3,8 @@ package org.commonweb.service;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+
+import org.commonweb.dto.request.UserCreationRequest;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -10,6 +12,7 @@ import org.mockito.MockitoAnnotations;
 import org.commonweb.entity.User;
 import org.commonweb.repository.UserRepository;
 import org.commonweb.impl.UserServiceImpl;
+import org.springframework.data.domain.Pageable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -43,13 +46,22 @@ class UserServiceTest {
     }
 
     @Test
-    void saveUserTest() {
-        User user = new User(); // 테스트 데이터 설정
-        when(userRepository.save(any(User.class))).thenReturn(user);
+    void createUserFromRequestTest() {
+        // UserCreationRequest 테스트 데이터 설정
+        UserCreationRequest request = new UserCreationRequest();
+        request.setUserId("testUser");
+        request.setPassword("password");
+        request.setEmail("test@example.com");
+        request.setName("Test Name");
+        request.setPhoneNumber("1234567890");
 
-        User savedUser = userService.saveUser(user);
-        assertEquals(user, savedUser);
-        verify(userRepository).save(user);
+        User user = new User(); // 예상되는 User 엔티티 결과
+        when(userRepository.save(any(User.class))).thenReturn(user); // userRepository의 save 호출 시 user 반환 설정
+
+        // createUserFromRequest 메서드를 호출하고 결과 검증
+        User createdUser = userService.createUserFromRequest(request);
+        assertEquals(user, createdUser); // 반환된 User 객체가 예상과 일치하는지 검증
+        verify(userRepository).save(any(User.class)); // userRepository의 save 메서드가 호출되었는지 검증
     }
 
     @Test
@@ -93,6 +105,7 @@ class UserServiceTest {
 
     @Test
     void getAllUsersTest() {
+
         List<User> mockUsers = Arrays.asList(new User(), new User());
         when(userRepository.findAll()).thenReturn(mockUsers);
 
