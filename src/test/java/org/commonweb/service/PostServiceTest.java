@@ -1,9 +1,11 @@
 package org.commonweb.service;
 
+import org.commonweb.dto.request.PostCreationRequest;
 import org.commonweb.entity.Post;
 import org.commonweb.entity.User;
 import org.commonweb.impl.PostServiceImpl;
 import org.commonweb.repository.PostRepository;
+import org.commonweb.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -13,15 +15,24 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class PostServiceTest {
+
+    @Mock
+    private UserRepository userRepository;
 
     @Mock
     private PostRepository postRepository;
@@ -40,23 +51,39 @@ class PostServiceTest {
     }
 
     @Test
-    void savePostTest() {
-        // Post 객체 생성 및 초기화
-        Post post = Post.builder()
-                .title("Test Title")
-                .content("Test Content")
-                .build();
+    void createPostTest() {
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getName()).thenReturn("userId");
 
-        // Mockito를 사용하여 postRepository.save 메서드가 호출될 때 post 객체를 반환하도록 설정
+        // SecurityContext 모킹 및 SecurityContextHolder에 설정
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
+        // UserRepository 모킹 설정
+        User user = new User(); // 혹은 User.builder().userId("userId").build(); 등으로 객체 생성
+        when(userRepository.findByUserId(anyString())).thenReturn(Optional.of(user));
+
+        // PostCreationRequest 객체 생성 및 초기화
+        PostCreationRequest request = new PostCreationRequest();
+        request.setTitle("Test Title");
+        request.setContent("Test Content");
+        // 필요한 경우, 다른 필드도 설정
+
+        // Mockito를 사용하여 postRepository.save 메서드가 호출될 때, 예상 결과를 설정
+        Post post = Post.builder()
+                .title(request.getTitle())
+                .content(request.getContent())
+                .build();
         when(postRepository.save(any(Post.class))).thenReturn(post);
 
         // 서비스 메서드 호출
-        Post savedPost = postService.savePost(post);
+        Post createdPost = postService.createPost(request);
 
         // 검증
-        assertNotNull(savedPost);
-        assertEquals("Test Title", savedPost.getTitle());
-        assertEquals("Test Content", savedPost.getContent());
+        assertNotNull(createdPost);
+        assertEquals(request.getTitle(), createdPost.getTitle());
+        assertEquals(request.getContent(), createdPost.getContent());
     }
 
     @Test
