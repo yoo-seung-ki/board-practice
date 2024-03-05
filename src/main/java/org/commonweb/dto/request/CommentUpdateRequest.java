@@ -6,12 +6,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CommentCreationRequest {
-
-    private Long id;
-    private Long postId;
-    private String userId;
+public class CommentUpdateRequest {
     @NotBlank(message = "Content cannot be blank")
-    private String content;
-
+    private String content; // 수정할 내용
 }
+

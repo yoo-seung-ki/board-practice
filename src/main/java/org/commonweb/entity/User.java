@@ -16,10 +16,10 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // 사용자 회원가입시 자동으로 생성되며 관리자가 사용자를 식별할때 사용되고 숫자로만 이루어진 고유번호.
 
     @Column(nullable = false, unique = true, length = 50)
-    private String userId;
+    private String userId; // 사용자가 회원가입시 직접 작성하는 고유한 문자열, 또는 문자열+숫자의 조합이며 사용자의 아이디 이다.
 
     @Column(nullable = false, length = 255)
     private String password;
