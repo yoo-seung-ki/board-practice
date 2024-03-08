@@ -13,3 +13,7 @@ server:
 logging:
   level:
     org.springframework.web: DEBUG
+
+jwt:
+  secret: iGj2i-j0ku-XCRTyOAWyQATsqvHRP3ePGan6e9YvQR8WSyLoS8MpWw2ojvhgMx8qTsXWMs-DGJiSs2vKQhHBqA
+  expiration: 604800000 # 예: 1주일

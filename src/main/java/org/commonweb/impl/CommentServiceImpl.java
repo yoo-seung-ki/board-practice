@@ -38,6 +38,15 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public Comment createComment(CommentCreationRequest request) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserId = authentication.getName(); // 현재 사용자의 ID 또는 사용자명을 가져옵니다.
+
+        // 요청된 사용자 ID와 현재 인증된 사용자의 ID가 일치하는지 검증합니다.
+        if (!request.getUserId().equals(currentUserId)) {
+            throw new AccessDeniedException("You are not authorized to create comments for other users");
+        }
+
         // 관련 게시글과 사용자 엔티티 조회 로직
         Post post = postRepository.findById(request.getPostId())
                 .orElseThrow(() -> new PostNotFoundException("Post not found with id: " + request.getPostId()));

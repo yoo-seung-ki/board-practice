@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/Comments")
+@RequestMapping("/comments")
 public class CommentController {
     private final CommentService commentService;
 
@@ -23,6 +23,7 @@ public class CommentController {
         this.commentService = commentService;
     }
     // Comment 엔티티를 CommentResponse DTO로 변환하는 메서드
+
     private CommentResponse convertToCommentResponse(Comment comment) {
         CommentResponse response = new CommentResponse();
         response.setId(comment.getId());
@@ -43,7 +44,7 @@ public class CommentController {
     }
 
     // createComment 메서드 예시
-    @PostMapping("/comments")
+    @PostMapping("/posts/{postId}/comments")
     public ResponseEntity<CommentResponse> createComment(@Valid @RequestBody CommentCreationRequest request) {
         Comment comment = commentService.createComment(request);
         CommentResponse response = convertToCommentResponse(comment);
