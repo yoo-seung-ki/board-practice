@@ -25,7 +25,7 @@ public class JWTUtil {
         return JWT.create()
                 .withSubject(username)
                 .withExpiresAt(new Date(System.currentTimeMillis() + expiration))
-                .sign(Algorithm.HMAC512(secret.getBytes()));
+                .sign(Algorithm.HMAC256(secret.getBytes()));
     }
 
     // 토큰 검증 및 사용자 이름 반환
