@@ -7,8 +7,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -32,24 +34,32 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
-
         http
-                // 새로운 방식으로 CSRF 설정을 비활성화합니다.
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/", "/home").permitAll() // 특정 경로에 대한 접근 허용
-                        .anyRequest().authenticated()) // 나머지 요청에 대해서는 인증 요구
-                .formLogin(withDefaults()) // 기본 로그인 폼 사용
-                .logout(withDefaults()); // 기본 로그아웃 처리 사용
-
-        // JwtAuthenticationFilter 인스턴스 생성 및 필터 체인에 추가
-        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager, jwtUtil);
-        http.addFilter(jwtAuthenticationFilter);
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/", "/home", "/index","/css/**", "/js/**", "/images/**").permitAll()
+                        .anyRequest().authenticated())
+                .httpBasic(withDefaults()); // Basic 인증 활성화, 필요에 따라 formLogin() 등으로 변경 가능
 
         return http.build();
     }
 
+    // 인증 간편화 로직 - 언젠가 인증 테스트가 필요해지면 다시 활성화 시킬것.
+    /*@Bean
+    public InMemoryUserDetailsManager userDetailsService() {
+        UserDetails user = User.withDefaultPasswordEncoder()
+                .username("user")
+                .password("password")
+                .roles("USER")
+                .build();
 
+        UserDetails admin = User.withDefaultPasswordEncoder()
+                .username("admin")
+                .password("admin")
+                .roles("ADMIN")
+                .build();
+
+        return new InMemoryUserDetailsManager(user, admin);
+    }*/
 
 }
