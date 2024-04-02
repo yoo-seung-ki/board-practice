@@ -5,7 +5,49 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <h1>Hello, Spring Boot and React!</h1>
+<header>
+    <nav>
+        <div class="dropdown">
+            <button class="dropbtn">대분류1</button>
+            <div class="dropdown-content">
+                <a href="#">소분류1-1</a>
+                <a href="#">소분류1-2</a>
+                <a href="#">소분류1-3</a>
+            </div>
+        </div>
+
+        <div class="dropdown">
+            <button class="dropbtn">대분류2</button>
+            <div class="dropdown-content">
+                <a href="#">소분류2-1</a>
+                <a href="#">소분류2-2</a>
+                <a href="#">소분류2-3</a>
+            </div>
+        </div>
+
+        <div class="dropdown">
+            <button class="dropbtn">대분류3</button>
+            <div class="dropdown-content">
+                <a href="#">소분류3-1</a>
+                <a href="#">소분류3-2</a>
+                <a href="#">소분류3-3</a>
+            </div>
+        </div>
+    </nav>
+    <div style="float: right;">
+        <form action="/login" method="post">
+            <label for="username">아이디:</label>
+            <input type="text" id="username" name="username">
+            <label for="password">비밀번호:</label>
+            <input type="password" id="password" name="password">
+            <button type="submit">로그인</button>
+        </form>
+    </div>
+</header>
+
+<footer>
+    <p>&copy; 2024 My Website</p>
+</footer>
     <script src="/js/index.js"></script>
 </body>
 </html>

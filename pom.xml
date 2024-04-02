@@ -32,6 +32,14 @@
             SLF4J: 로깅을 위한 추상 레이어를 제공합니다.
             Logback: SLF4J의 구현체로, 실제 로그를 기록합니다.
         -->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <version>3.1.2</version>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
