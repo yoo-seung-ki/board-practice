@@ -1,4 +1,4 @@
-package org.commonweb.impl;
+package org.commonweb.serviceimpl;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.commonweb.dto.request.UserCreationRequest;
@@ -6,8 +6,6 @@ import org.commonweb.dto.request.UserUpdateRequest;
 import org.commonweb.entity.User;
 import org.commonweb.repository.UserRepository;
 import org.commonweb.service.UserService;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -41,8 +39,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<User> getAllUsers(Pageable pageable) {
-        return userRepository.findAll(pageable);
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 
     @Override

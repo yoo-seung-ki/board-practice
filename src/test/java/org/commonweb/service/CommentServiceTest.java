@@ -2,34 +2,30 @@ package org.commonweb.service;
 
 
 import org.commonweb.dto.request.CommentCreationRequest;
-import org.commonweb.dto.request.CommentUpdateRequest;
 import org.commonweb.entity.Comment;
 import org.commonweb.entity.Post;
 import org.commonweb.entity.User;
-import org.commonweb.impl.CommentServiceImpl;
 import org.commonweb.repository.CommentRepository;
 import org.commonweb.repository.PostRepository;
 import org.commonweb.repository.UserRepository;
+import org.commonweb.serviceimpl.CommentServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class CommentServiceTest {
     @Mock
@@ -101,34 +97,34 @@ public class CommentServiceTest {
 
     @Test
     void findCommentsByPostIdTest() {
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> page = new PageImpl<>(Collections.singletonList(new Comment()));
-        when(commentRepository.findByPostId(anyLong(), eq(pageable))).thenReturn(page);
+        List<Comment> expectedComments = Collections.singletonList(new Comment());
+        when(commentRepository.findByPostId(anyLong())).thenReturn(expectedComments);
 
-        Page<Comment> result = commentService.findCommentsByPostId(1L, pageable);
+        List<Comment> result = commentService.findCommentsByPostId(1L);
 
-        assertEquals(1, result.getTotalElements());
+        assertEquals(expectedComments.size(), result.size());
     }
 
     @Test
     void findCommentsByUserIdTest() {
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> page = new PageImpl<>(Collections.singletonList(new Comment()));
-        when(commentRepository.findByUser_UserId(any(String.class), eq(pageable))).thenReturn(page);
+        List<Comment> expectedComments = Collections.singletonList(new Comment());
+        when(commentRepository.findByUser_UserId(any(String.class))).thenReturn(expectedComments);
 
-        Page<Comment> result = commentService.findCommentsByUserId("user123", pageable);
+        List<Comment> result = commentService.findCommentsByUserId("user123");
 
-        assertEquals(1, result.getTotalElements());
+        assertEquals(expectedComments.size(), result.size());
+        // 추가적인 검증 로직을 적용할 수 있습니다.
     }
+
 
     @Test
     void getAllCommentsTest() {
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Comment> page = new PageImpl<>(Collections.singletonList(new Comment()));
-        when(commentRepository.findAll(eq(pageable))).thenReturn(page);
+        List<Comment> expectedComments = Collections.singletonList(new Comment());
+        when(commentRepository.findAll()).thenReturn(expectedComments);
 
-        Page<Comment> result = commentService.getAllComments(pageable);
+        List<Comment> result = commentService.getAllComments();
 
-        assertEquals(1, result.getTotalElements());
+        assertEquals(expectedComments.size(), result.size());
+        // 추가적인 검증 로직을 적용할 수 있습니다.
     }
 }

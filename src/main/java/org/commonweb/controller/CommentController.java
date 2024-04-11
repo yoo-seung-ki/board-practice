@@ -7,11 +7,12 @@ import org.commonweb.dto.response.CommentResponse;
 import org.commonweb.entity.Comment;
 import org.commonweb.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/comments")
@@ -37,9 +38,11 @@ public class CommentController {
 
     // 게시글 ID에 따른 댓글 목록 조회
     @GetMapping("/posts/{postId}/comments")
-    public ResponseEntity<Page<CommentResponse>> getCommentsByPostId(@PathVariable Long postId, Pageable pageable) {
-        Page<Comment> comments = commentService.findCommentsByPostId(postId, pageable);
-        Page<CommentResponse> commentResponses = comments.map(this::convertToCommentResponse);
+    public ResponseEntity<List<CommentResponse>> getCommentsByPostId(@PathVariable Long postId) {
+        List<Comment> comments = commentService.findCommentsByPostId(postId);
+        List<CommentResponse> commentResponses = comments.stream()
+                .map(this::convertToCommentResponse)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(commentResponses);
     }
 

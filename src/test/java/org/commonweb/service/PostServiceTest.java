@@ -3,7 +3,7 @@ package org.commonweb.service;
 import org.commonweb.dto.request.PostCreationRequest;
 import org.commonweb.entity.Post;
 import org.commonweb.entity.User;
-import org.commonweb.impl.PostServiceImpl;
+import org.commonweb.serviceimpl.PostServiceImpl;
 import org.commonweb.repository.PostRepository;
 import org.commonweb.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,16 +11,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -88,44 +86,41 @@ class PostServiceTest {
 
     @Test
     void findPostByIdTest() {
-        Pageable pageable = PageRequest.of(0, 10);
         Post post = new Post(); // Post 객체 초기화
-        Page<Post> page = new PageImpl<>(Collections.singletonList(post));
 
-        when(postRepository.findByUser_UserId("user123",pageable)).thenReturn(page);
+        when(postRepository.findByUser_UserId("user123")).thenReturn(Collections.singletonList(post));
 
-        Page<Post> foundPost = postService.searchPostsByUserId("user123",pageable);
-        assertEquals(post, foundPost.getContent().get(0));
+        List<Post> foundPosts = postService.searchPostsByUserId("user123");
+        assertFalse(foundPosts.isEmpty()); // 리스트가 비어있지 않은지 확인
+        assertEquals(post, foundPosts.get(0)); // 첫 번째 항목이 예상하는 Post 객체와 동일한지 확인
     }
 
     @Test
     void getAllPostsTest() {
-        Pageable pageable = PageRequest.of(0, 10);
-        Post post = new Post(); // Post 객체 초기화
-        Page<Post> page = new PageImpl<>(Collections.singletonList(post));
+        List<Post> post = Arrays.asList(new Post(), new Post());
+        when(postRepository.findAll()).thenReturn(post);
 
-        when(postRepository.findAll(pageable)).thenReturn(page);
+        List<Post> result = postService.getAllPosts();
 
-        Page<Post> result = postService.getAllPosts(pageable);
-
-        assertEquals(1, result.getTotalElements());
-        assertEquals(post, result.getContent().get(0));
+        assertNotNull(result);
+        assertEquals(post.size(), result.size());
     }
 
     @Test
     void searchPostsByTitleOrContentTest() {
-        Pageable pageable = PageRequest.of(0, 10);
         // Post 객체에 title과 content 필드에 실제 값을 할당
         Post post = Post.builder()
                 .title("Test Title")
                 .content("Test Content")
                 .build();
-        Page<Post> page = new PageImpl<>(Collections.singletonList(post));
+        List<Post> expectedPosts = Collections.singletonList(post);
 
         String keyword = "Test";
-        when(postRepository.findByTitleOrContent(keyword, pageable)).thenReturn(page);
-        Page<Post> foundPosts = postService.searchPostsByTitleOrContent(keyword, pageable);
-        assertTrue(foundPosts.getContent().stream().anyMatch(p -> p.getTitle().contains(keyword) || p.getContent().contains(keyword)));
+        when(postRepository.findByTitleOrContent(keyword)).thenReturn(expectedPosts); // 스텁 설정을 수정합니다.
+        List<Post> foundPosts = postService.searchPostsByTitleOrContent(keyword); // 서비스 호출 부분을 수정합니다.
+
+        // 검증 부분을 수정합니다. getContent() 메서드 호출을 제거합니다.
+        assertTrue(foundPosts.stream().anyMatch(p -> p.getTitle().contains(keyword) || p.getContent().contains(keyword)));
     }
 
 

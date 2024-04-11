@@ -1,14 +1,11 @@
 package org.commonweb.controller;
 
-import jakarta.persistence.EntityNotFoundException;
 import org.commonweb.dto.request.UserCreationRequest;
 import org.commonweb.dto.request.UserUpdateRequest;
 import org.commonweb.dto.response.UserResponse;
 import org.commonweb.entity.User;
 import org.commonweb.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -42,8 +39,8 @@ public class UserController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<Page<User>> getAllUsers(Pageable pageable) {
-        Page<User> users = userService.getAllUsers(pageable);
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
 

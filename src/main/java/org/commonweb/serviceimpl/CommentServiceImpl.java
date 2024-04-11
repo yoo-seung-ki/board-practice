@@ -1,4 +1,4 @@
-package org.commonweb.impl;
+package org.commonweb.serviceimpl;
 
 import jakarta.transaction.Transactional;
 import org.commonweb.dto.request.CommentCreationRequest;
@@ -13,14 +13,12 @@ import org.commonweb.repository.CommentRepository;
 import org.commonweb.repository.PostRepository;
 import org.commonweb.repository.UserRepository;
 import org.commonweb.service.CommentService;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @Transactional
@@ -62,17 +60,17 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Page<Comment> findCommentsByPostId(Long postId, Pageable pageable) {
-        return commentRepository.findByPostId(postId, pageable);
+    public List<Comment> findCommentsByPostId(Long postId) {
+        return commentRepository.findByPostId(postId);
     }
 
     @Override
-    public Page<Comment> findCommentsByUserId(String userId, Pageable pageable) {
-        return commentRepository.findByUser_UserId(userId, pageable);
+    public List<Comment> findCommentsByUserId(String userId) {
+        return commentRepository.findByUser_UserId(userId);
     }
     @Override
-    public Page<Comment> getAllComments(Pageable pageable) {
-        return commentRepository.findAll(pageable);
+    public List<Comment> getAllComments() {
+        return commentRepository.findAll();
     }
 
     @Override

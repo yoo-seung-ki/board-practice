@@ -1,4 +1,4 @@
-package org.commonweb.impl;
+package org.commonweb.serviceimpl;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -10,18 +10,16 @@ import org.commonweb.entity.User;
 import org.commonweb.repository.PostRepository;
 import org.commonweb.repository.UserRepository;
 import org.commonweb.service.PostService;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -45,13 +43,13 @@ public class PostServiceImpl implements PostService {
 
 
     @Override
-    public Page<Post> getAllPosts(Pageable pageable) {
-        return postRepository.findAll(pageable);
+    public List<Post> getAllPosts() {
+        return postRepository.findAll();
     }
 
     @Override
-    public Page<Post> searchPostsByUserId(String userId, Pageable pageable) {
-        return postRepository.findByUser_UserId(userId, pageable);
+    public List<Post> searchPostsByUserId(String userId) {
+        return postRepository.findByUser_UserId(userId);
     }
 
     public Optional<Post> searchPostById(Long id) {
@@ -59,23 +57,23 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Page<Post> searchPostsByTitle(String title, Pageable pageable) {
-        return postRepository.findByTitleContaining(title, pageable);
+    public List<Post> searchPostsByTitle(String title) {
+        return postRepository.findByTitleContaining(title);
     }
 
     @Override
-    public Page<Post> searchPostsByContent(String content, Pageable pageable) {
-        return postRepository.findByContentContaining(content, pageable);
+    public List<Post> searchPostsByContent(String content) {
+        return postRepository.findByContentContaining(content);
     }
 
     @Override
-    public Page<Post> searchPostsByDateRange(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
-        return postRepository.findByCreatedAtBetween(startDate, endDate, pageable);
+    public List<Post> searchPostsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
+        return postRepository.findByCreatedAtBetween(startDate, endDate);
     }
 
     @Override
-    public Page<Post> searchPostsByTitleOrContent(String keyword, Pageable pageable) {
-        return postRepository.findByTitleOrContent(keyword, pageable);
+    public List<Post> searchPostsByTitleOrContent(String keyword) {
+        return postRepository.findByTitleOrContent(keyword);
     }
 
     public User getCurrentUser() {

@@ -7,11 +7,12 @@ import org.commonweb.entity.Post;
 import org.commonweb.exception.PostNotFoundException;
 import org.commonweb.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/posts")
@@ -39,9 +40,11 @@ public class PostController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<PostResponse>> getAllPosts(Pageable pageable) {
-        Page<Post> posts = postService.getAllPosts(pageable);
-        Page<PostResponse> postResponses = posts.map(this::convertToPostResponse);
+    public ResponseEntity<List<PostResponse>> getAllPosts() {
+        List<Post> posts = postService.getAllPosts();
+        List<PostResponse> postResponses = posts.stream()
+                .map(this::convertToPostResponse)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(postResponses);
     }
 

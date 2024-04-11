@@ -11,11 +11,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.commonweb.entity.User;
 import org.commonweb.repository.UserRepository;
-import org.commonweb.impl.UserServiceImpl;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.commonweb.serviceimpl.UserServiceImpl;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -107,20 +103,13 @@ class UserServiceTest {
 
     @Test
     void getAllUsersTest() {
+        List<User> users = Arrays.asList(new User(), new User()); // 예시로 2개의 User 객체 생성
+        when(userRepository.findAll()).thenReturn(users); // userRepository의 findAll 메서드가 users 리스트를 반환하도록 설정
 
-        // 필요한 경우, 테스트를 위한 Pageable 객체 생성
-        Pageable pageable = PageRequest.of(0, 10); // 첫 번째 페이지, 페이지 당 10개 항목
+        List<User> result = userService.getAllUsers(); // 실제 서비스 메서드 호출
 
-        // 모킹: UserRepository의 findAll 메서드가 Pageable을 사용하여 호출될 때의 동작 정의
-        Page<User> mockPage = new PageImpl<>(Arrays.asList(new User(), new User()));
-        when(userRepository.findAll(pageable)).thenReturn(mockPage);
-
-        // 테스트 실행
-        Page<User> result = userService.getAllUsers(pageable);
-
-        // 검증: 결과가 예상대로인지 확인
-        assertNotNull(result);
-        assertEquals(2, result.getContent().size()); // 모킹된 결과와 일치하는지 검증
+        assertNotNull(result); // 결과가 null이 아닌지 확인
+        assertEquals(2, result.size()); // 반환된 리스트의 크기가 예상과 일치하는지 확인
     }
 
     // 기타 테스트 메서드...
