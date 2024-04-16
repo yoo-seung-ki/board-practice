@@ -19,88 +19,31 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final HtmlSanitizer htmlSanitizer;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, HtmlSanitizer htmlSanitizer) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.htmlSanitizer = htmlSanitizer;
     }
 
     public User updateUser(String userId, UserUpdateRequest updateRequest) {
-        /*
-        String sanitizedOldUserId = htmlSanitizer.sanitize(userId);
-        String sanitizedNewUserId = htmlSanitizer.sanitize(updateRequest.getUserId());
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
-        User user = userRepository.findByUserId(sanitizedOldUserId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + sanitizedOldUserId));
-
-        if (!sanitizedOldUserId.equals(sanitizedNewUserId) && userRepository.existsByUserId(sanitizedNewUserId)) {
-            throw new IllegalStateException("New user ID already exists: " + sanitizedNewUserId);
+        if (!userId.equals(updateRequest.getUserId()) && userRepository.existsByUserId(updateRequest.getUserId())) {
+            throw new IllegalStateException("New user ID already exists: " + updateRequest.getUserId());
         }
-
-        String sanitizedOldPhoneNumber = htmlSanitizer.sanitize(user.getPhoneNumber());
-        String sanitizedNewPhoneNumber = htmlSanitizer.sanitize(updateRequest.getPhoneNumber());
-
-        if (!sanitizedOldPhoneNumber.equals(sanitizedNewPhoneNumber) && userRepository.existsByPhoneNumber(sanitizedNewPhoneNumber)) {
-            throw new IllegalStateException("New phone number already exists: " + sanitizedNewPhoneNumber);
-        }
-
-        String sanitizedOldEmail = htmlSanitizer.sanitize(user.getEmail());
-        String sanitizedNewEmail = htmlSanitizer.sanitize(updateRequest.getEmail());
-
-        if (!sanitizedOldEmail.equals(sanitizedNewEmail) && userRepository.existsByEmail(sanitizedNewEmail)) {
-            throw new IllegalStateException("New email already exists: " + sanitizedNewEmail);
-        }
-
-        String sanitizedName = htmlSanitizer.sanitize(updateRequest.getName());
 
         String encodedPassword = updateRequest.getPassword() != null && !updateRequest.getPassword().isEmpty()
                 ? passwordEncoder.encode(updateRequest.getPassword())
                 : user.getPassword();
 
         user.updateUserInfo(
-                sanitizedNewUserId,
+                updateRequest.getUserId(),
                 encodedPassword,
-                sanitizedNewEmail,
-                sanitizedName,
-                sanitizedNewPhoneNumber);
-
-        return userRepository.save(user);
-
-         */
-
-        String sanitizedOldUserId = htmlSanitizer.sanitize(userId);
-        String sanitizedNewUserId = htmlSanitizer.sanitize(updateRequest.getUserId());
-
-        User user = userRepository.findByUserId(sanitizedOldUserId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + sanitizedOldUserId));
-
-        if (!sanitizedOldUserId.equals(sanitizedNewUserId) && userRepository.existsByUserId(sanitizedNewUserId)) {
-            throw new IllegalStateException("New user ID already exists: " + sanitizedNewUserId);
-        }
-
-        // 이름 변경 확인
-        String sanitizedName = updateRequest.getName() != null ? htmlSanitizer.sanitize(updateRequest.getName()) : user.getName();
-
-        // 전화번호 변경 확인
-        String sanitizedPhoneNumber = updateRequest.getPhoneNumber() != null ? htmlSanitizer.sanitize(updateRequest.getPhoneNumber()) : user.getPhoneNumber();
-
-        // 이메일 변경 확인
-        String sanitizedEmail = updateRequest.getEmail() != null ? htmlSanitizer.sanitize(updateRequest.getEmail()) : user.getEmail();
-
-        // 비밀번호 변경 확인
-        String encodedPassword = updateRequest.getPassword() != null && !updateRequest.getPassword().isEmpty()
-                ? passwordEncoder.encode(updateRequest.getPassword())
-                : user.getPassword();
-
-        user.updateUserInfo(
-                sanitizedNewUserId,
-                encodedPassword,
-                sanitizedEmail,
-                sanitizedName,
-                sanitizedPhoneNumber);
+                updateRequest.getEmail(),
+                updateRequest.getName(),
+                updateRequest.getPhoneNumber());
 
         return userRepository.save(user);
     }
@@ -126,21 +69,16 @@ public class UserServiceImpl implements UserService {
     }
 
     public User createUserFromRequest(UserCreationRequest request) {
-        String sanitizedId = htmlSanitizer.sanitize(request.getUserId());
-        String sanitizedEmail = htmlSanitizer.sanitize(request.getEmail());
-        String sanitizedName = htmlSanitizer.sanitize(request.getName());
-        String sanitizedPhoneNumber = htmlSanitizer.sanitize(request.getPhoneNumber());
-
-        if (userRepository.existsByUserId(sanitizedId)) {
-            throw new IllegalStateException("User already exists with id: " + sanitizedId);
+        if (userRepository.existsByUserId(request.getUserId())) {
+            throw new IllegalStateException("User already exists with id: " + request.getUserId());
         }
         String encodedPassword = passwordEncoder.encode(request.getPassword());
         User user = User.builder()
-                .userId(sanitizedId)
+                .userId(request.getUserId())
                 .password(encodedPassword)
-                .email(sanitizedEmail)
-                .name(sanitizedName)
-                .phoneNumber(sanitizedPhoneNumber)
+                .email(request.getEmail())
+                .name(request.getName())
+                .phoneNumber(request.getPhoneNumber())
                 .build();
         return userRepository.save(user);
     }

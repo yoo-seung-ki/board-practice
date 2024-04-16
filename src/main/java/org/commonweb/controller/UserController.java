@@ -4,6 +4,7 @@ import org.commonweb.dto.request.UserCreationRequest;
 import org.commonweb.dto.request.UserUpdateRequest;
 import org.commonweb.dto.response.UserResponse;
 import org.commonweb.entity.User;
+import org.commonweb.security.HtmlSanitizer;
 import org.commonweb.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,18 +17,30 @@ import java.util.List;
 @RestController
 @RequestMapping("/Users")
 public class UserController {
-    private UserService userService;
+    private final UserService userService;
+
+    private final HtmlSanitizer htmlSanitizer;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, HtmlSanitizer htmlSanitizer) {
         this.userService = userService;
+        this.htmlSanitizer = htmlSanitizer;
     }
 
     @PostMapping("/users")
     public ResponseEntity<UserResponse> createUser(@RequestBody UserCreationRequest creationRequest) {
+        sanitizeUserCreationRequest(creationRequest);
         User savedUser = userService.createUserFromRequest(creationRequest);
         UserResponse userResponse = convertToUserResponse(savedUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
+    }
+
+    @PutMapping("/users/{userId}")
+    public ResponseEntity<UserResponse> updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest updateRequest) {
+        sanitizeUserUpdateRequest(updateRequest);
+        User updatedUser = userService.updateUser(userId, updateRequest);
+        UserResponse userResponse = convertToUserResponse(updatedUser);
+        return ResponseEntity.ok(userResponse);
     }
 
     @GetMapping("/users/{userId}")
@@ -44,15 +57,6 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    @PutMapping("/users/{userId}")
-    public ResponseEntity<UserResponse> updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest updateRequest) {
-        // UserUpdateRequest DTO를 사용하여 사용자 정보 업데이트 로직 수행
-        User updatedUser = userService.updateUser(userId, updateRequest);
-
-        // UserResponse DTO를 생성하여 응답
-        UserResponse userResponse = convertToUserResponse(updatedUser);
-        return ResponseEntity.ok(userResponse);
-    }
 
     private UserResponse convertToUserResponse(User user) {
         UserResponse userResponse = new UserResponse();
@@ -62,5 +66,19 @@ public class UserController {
         userResponse.setPhoneNumber(user.getPhoneNumber());
         // 추가적으로, User 엔티티의 다른 필드들도 여기에 매핑할 수 있습니다.
         return userResponse;
+    }
+
+    private void sanitizeUserCreationRequest(UserCreationRequest request) {
+        request.setUserId(htmlSanitizer.sanitize(request.getUserId()));
+        request.setEmail(htmlSanitizer.sanitize(request.getEmail()));
+        request.setName(htmlSanitizer.sanitize(request.getName()));
+        request.setPhoneNumber(htmlSanitizer.sanitize(request.getPhoneNumber()));
+    }
+
+    private void sanitizeUserUpdateRequest(UserUpdateRequest request) {
+        request.setUserId(htmlSanitizer.sanitize(request.getUserId()));
+        request.setEmail(htmlSanitizer.sanitize(request.getEmail()));
+        request.setName(htmlSanitizer.sanitize(request.getName()));
+        request.setPhoneNumber(htmlSanitizer.sanitize(request.getPhoneNumber()));
     }
 }
