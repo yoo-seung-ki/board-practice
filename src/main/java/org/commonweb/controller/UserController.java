@@ -18,7 +18,6 @@ import java.util.List;
 @RequestMapping("/Users")
 public class UserController {
     private final UserService userService;
-
     private final HtmlSanitizer htmlSanitizer;
 
     @Autowired

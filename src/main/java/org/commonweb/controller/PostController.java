@@ -5,6 +5,7 @@ import org.commonweb.dto.request.PostUpdateRequest;
 import org.commonweb.dto.response.PostResponse;
 import org.commonweb.entity.Post;
 import org.commonweb.exception.PostNotFoundException;
+import org.commonweb.security.HtmlSanitizer;
 import org.commonweb.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,20 +16,33 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/posts")
+@RequestMapping("/Posts")
 public class PostController {
     private final PostService postService;
+    private final HtmlSanitizer htmlSanitizer;
 
     @Autowired
-    public PostController(PostService postService) {
+    public PostController(PostService postService, HtmlSanitizer htmlSanitizer) {
         this.postService = postService;
+        this.htmlSanitizer = htmlSanitizer;
     }
 
     @PostMapping
     public ResponseEntity<PostResponse> createPost(@RequestBody PostCreationRequest request) {
+        request.setTitle(htmlSanitizer.sanitize(request.getTitle()));
+        request.setContent(htmlSanitizer.sanitize(request.getContent()));
         Post post = postService.createPost(request);
         PostResponse postResponse = convertToPostResponse(post);
         return ResponseEntity.status(HttpStatus.CREATED).body(postResponse);
+    }
+
+    @PutMapping("/{postId}")
+    public ResponseEntity<PostResponse> updatePost(@PathVariable Long postId, @RequestBody PostUpdateRequest request) {
+        request.setTitle(htmlSanitizer.sanitize(request.getTitle()));
+        request.setContent(htmlSanitizer.sanitize(request.getContent()));
+        Post updatedPost = postService.updatePost(postId, request);
+        PostResponse postResponse = convertToPostResponse(updatedPost);
+        return ResponseEntity.ok(postResponse);
     }
 
     @GetMapping("/{postId}")
@@ -46,13 +60,6 @@ public class PostController {
                 .map(this::convertToPostResponse)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(postResponses);
-    }
-
-    @PutMapping("/{postId}")
-    public ResponseEntity<PostResponse> updatePost(@PathVariable Long postId, @RequestBody PostUpdateRequest request) {
-        Post updatedPost = postService.updatePost(postId, request);
-        PostResponse postResponse = convertToPostResponse(updatedPost);
-        return ResponseEntity.ok(postResponse);
     }
 
     @DeleteMapping("/{postId}")
