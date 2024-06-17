@@ -1,45 +1,33 @@
 package org.commonweb.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@Entity
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Post {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 255)
     private String title;
 
-    @Column(columnDefinition = "TEXT")
     private String content;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @CreationTimestamp
-    @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    @UpdateTimestamp
-    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    public void updateInfo(String title, String content, LocalDateTime updatedAt) {
+    public void updateInfo(String title, String content) {
         this.title = title;
         this.content = content;
-        this.updatedAt = updatedAt;
-        // 기타 업데이트할 필드가 있다면 여기에 추가
+        this.updatedAt = LocalDateTime.now(); // 수정 시간 업데이트
     }
 }

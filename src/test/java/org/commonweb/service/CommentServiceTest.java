@@ -1,13 +1,12 @@
 package org.commonweb.service;
 
-
 import org.commonweb.dto.request.CommentCreationRequest;
 import org.commonweb.entity.Comment;
 import org.commonweb.entity.Post;
 import org.commonweb.entity.User;
-import org.commonweb.repository.CommentRepository;
-import org.commonweb.repository.PostRepository;
-import org.commonweb.repository.UserRepository;
+import org.commonweb.mapper.CommentMapper;
+import org.commonweb.mapper.PostMapper;
+import org.commonweb.mapper.UserMapper;
 import org.commonweb.serviceimpl.CommentServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,17 +27,18 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class CommentServiceTest {
+
     @Mock
-    private CommentRepository commentRepository;
+    private CommentMapper commentMapper;
+
+    @Mock
+    private PostMapper postMapper;
+
+    @Mock
+    private UserMapper userMapper;
 
     @InjectMocks
     private CommentServiceImpl commentService;
-
-    @Mock
-    private PostRepository postRepository;
-
-    @Mock
-    private UserRepository userRepository;
 
     @BeforeEach
     void setUp() {
@@ -82,9 +82,8 @@ public class CommentServiceTest {
                 .content("This is a test comment.")
                 .build();
 
-        when(commentRepository.save(isA(Comment.class))).thenReturn(expectedComment);
-        when(userRepository.findByUserId("user123")).thenReturn(Optional.of(mockUser));
-        when(postRepository.findById(1L)).thenReturn(Optional.of(mockPost));
+        when(userMapper.findByUserId("user123")).thenReturn(Optional.of(mockUser));
+        when(postMapper.findById(1L)).thenReturn(Optional.of(mockPost));
 
         // When
         Comment actualComment = commentService.createComment(request);
@@ -98,7 +97,7 @@ public class CommentServiceTest {
     @Test
     void findCommentsByPostIdTest() {
         List<Comment> expectedComments = Collections.singletonList(new Comment());
-        when(commentRepository.findByPostId(anyLong())).thenReturn(expectedComments);
+        when(commentMapper.findCommentsByPostId(anyLong())).thenReturn(expectedComments);
 
         List<Comment> result = commentService.findCommentsByPostId(1L);
 
@@ -108,7 +107,7 @@ public class CommentServiceTest {
     @Test
     void findCommentsByUserIdTest() {
         List<Comment> expectedComments = Collections.singletonList(new Comment());
-        when(commentRepository.findByUser_UserId(any(String.class))).thenReturn(expectedComments);
+        when(commentMapper.findCommentsByUserId(any(String.class))).thenReturn(expectedComments);
 
         List<Comment> result = commentService.findCommentsByUserId("user123");
 
@@ -116,11 +115,10 @@ public class CommentServiceTest {
         // 추가적인 검증 로직을 적용할 수 있습니다.
     }
 
-
     @Test
     void getAllCommentsTest() {
         List<Comment> expectedComments = Collections.singletonList(new Comment());
-        when(commentRepository.findAll()).thenReturn(expectedComments);
+        when(commentMapper.getAllComments()).thenReturn(expectedComments);
 
         List<Comment> result = commentService.getAllComments();
 

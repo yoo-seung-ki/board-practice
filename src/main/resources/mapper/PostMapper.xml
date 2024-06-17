@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.commonweb.mapper.PostMapper">
+
+    <resultMap id="PostResultMap" type="org.commonweb.entity.Post">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <association property="user" column="user_id" javaType="org.commonweb.entity.User"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="PostResultMap">
+        SELECT * FROM posts
+    </select>
+    <select id="findByUserId" parameterType="string" resultType="org.commonweb.entity.Post">
+        SELECT * FROM posts WHERE user_id = #{userId}
+    </select>
+    <select id="findByTitleContaining" parameterType="string" resultType="org.commonweb.entity.Post">
+        SELECT * FROM posts WHERE title LIKE CONCAT('%', #{title}, '%')
+    </select>
+    <select id="findByContentContaining" parameterType="string" resultType="org.commonweb.entity.Post">
+        SELECT * FROM posts WHERE content LIKE CONCAT('%', #{content}, '%')
+    </select>
+    <select id="findByCreatedAtBetween" parameterType="map" resultType="org.commonweb.entity.Post">
+        SELECT * FROM posts WHERE created_at BETWEEN #{startDate} AND #{endDate}
+    </select>
+    <select id="findByTitleOrContent" parameterType="string" resultType="org.commonweb.entity.Post">
+        SELECT * FROM posts WHERE title LIKE CONCAT('%', #{keyword}, '%')
+        OR content LIKE CONCAT('%', #{keyword}, '%')
+    </select>
+    <insert id="createPost" parameterType="org.commonweb.entity.Post">
+        INSERT INTO posts (title, content, user_id, created_at, updated_at)
+        VALUES (#{title}, #{content}, #{user.id}, #{createdAt}, #{updatedAt})
+    </insert>
+    <update id="updatePost" parameterType="org.commonweb.entity.Post">
+        UPDATE posts
+        SET title = #{title}, content = #{content}, updated_at = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+    <delete id="deletePostById" parameterType="long">
+        DELETE FROM posts WHERE id = #{id}
+    </delete>
+</mapper>

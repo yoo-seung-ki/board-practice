@@ -1,11 +1,13 @@
 package org.commonweb.serviceimpl;
 
-import jakarta.persistence.EntityNotFoundException;
 import org.commonweb.dto.request.UserCreationRequest;
 import org.commonweb.dto.request.UserUpdateRequest;
 import org.commonweb.entity.User;
-import org.commonweb.repository.UserRepository;
-import org.commonweb.security.HtmlSanitizer;
+import org.commonweb.exception.ResourceNotFoundException;
+import org.commonweb.mapper.CommentMapper;
+import org.commonweb.mapper.PostMapper;
+import org.commonweb.mapper.UserMapper;
+
 import org.commonweb.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,20 +19,25 @@ import java.util.Optional;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository userRepository;
+    private final UserMapper userMapper;
+    private final PostMapper postMapper;
+    private final CommentMapper commentMapper;
     private final PasswordEncoder passwordEncoder;
 
+
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
+    public UserServiceImpl(UserMapper userMapper, PostMapper postMapper, CommentMapper commentMapper,  PasswordEncoder passwordEncoder) {
+        this.userMapper = userMapper;
+        this.postMapper = postMapper;
+        this.commentMapper = commentMapper;
         this.passwordEncoder = passwordEncoder;
     }
 
     public User updateUser(String userId, UserUpdateRequest updateRequest) {
-        User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+        User user = userMapper.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
-        if (!userId.equals(updateRequest.getUserId()) && userRepository.existsByUserId(updateRequest.getUserId())) {
+        if (!userId.equals(updateRequest.getUserId()) && userMapper.findByUserId(updateRequest.getUserId()).isPresent()) {
             throw new IllegalStateException("New user ID already exists: " + updateRequest.getUserId());
         }
 
@@ -45,31 +52,32 @@ public class UserServiceImpl implements UserService {
                 updateRequest.getName(),
                 updateRequest.getPhoneNumber());
 
-        return userRepository.save(user);
+        userMapper.updateUser(user);
+        return user;
     }
 
     @Override
     public Optional<User> findByUserId(String userId) {
-        return userRepository.findByUserId(userId);
+        return userMapper.findByUserId(userId);
     }
 
     @Override
     public List<User> getAllUsers() {
-        return userRepository.findAll();
+        return userMapper.getAllUsers();
     }
 
     @Override
     public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
+        return userMapper.findByEmail(email);
     }
 
     @Override
     public Optional<User> findByPhoneNumber(String phoneNumber) {
-        return userRepository.findByPhoneNumber(phoneNumber);
+        return userMapper.findByPhoneNumber(phoneNumber);
     }
 
     public User createUserFromRequest(UserCreationRequest request) {
-        if (userRepository.existsByUserId(request.getUserId())) {
+        if (userMapper.findByUserId(request.getUserId()).isPresent()) {
             throw new IllegalStateException("User already exists with id: " + request.getUserId());
         }
         String encodedPassword = passwordEncoder.encode(request.getPassword());
@@ -80,7 +88,8 @@ public class UserServiceImpl implements UserService {
                 .name(request.getName())
                 .phoneNumber(request.getPhoneNumber())
                 .build();
-        return userRepository.save(user);
+        userMapper.createUser(user);
+        return user;
     }
 
 }

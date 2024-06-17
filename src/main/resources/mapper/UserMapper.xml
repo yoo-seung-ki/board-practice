@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.commonweb.mapper.UserMapper">
+
+    <resultMap id="UserResultMap" type="org.commonweb.entity.User">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="password" column="password"/>
+        <result property="email" column="email"/>
+        <result property="name" column="name"/>
+        <result property="phoneNumber" column="phone_number"/>
+    </resultMap>
+
+    <select id="findByUserId" parameterType="string" resultType="org.commonweb.entity.User">
+        SELECT * FROM users WHERE user_id = #{userId}
+    </select>
+    <select id="findByEmail" parameterType="string" resultType="org.commonweb.entity.User">
+        SELECT * FROM users WHERE email = #{email}
+    </select>
+    <select id="findByPhoneNumber" parameterType="string" resultType="org.commonweb.entity.User">
+        SELECT * FROM users WHERE phone_number = #{phoneNumber}
+    </select>
+    <select id="getAllUsers" resultType="org.commonweb.entity.User">
+        SELECT * FROM users
+    </select>
+    <insert id="createUser" parameterType="org.commonweb.entity.User">
+        INSERT INTO users (user_id, password, email, name, phone_number, user_created_at, user_updated_at)
+        VALUES (#{userId}, #{password}, #{email}, #{name}, #{phoneNumber}, #{userCreatedAt}, #{userUpdatedAt})
+    </insert>
+    <update id="updateUser" parameterType="org.commonweb.entity.User">
+        UPDATE users
+        SET user_id = #{userId}, password = #{password}, email = #{email}, name = #{name}, phone_number = #{phoneNumber}, user_updated_at = #{userUpdatedAt}
+        WHERE user_id = #{userId}
+    </update>
+    <delete id="deleteUser">
+        DELETE FROM users WHERE id = #{id}
+    </delete>
+</mapper>

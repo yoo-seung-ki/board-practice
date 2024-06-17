@@ -20,4 +20,5 @@ public interface PostService {
     List<Post> searchPostsByTitleOrContent(String keyword);
     public Post createPost(PostCreationRequest request);
     public Post updatePost(Long postId, PostUpdateRequest request);
+
 }

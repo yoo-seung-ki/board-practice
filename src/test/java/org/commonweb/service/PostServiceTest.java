@@ -3,9 +3,9 @@ package org.commonweb.service;
 import org.commonweb.dto.request.PostCreationRequest;
 import org.commonweb.entity.Post;
 import org.commonweb.entity.User;
+import org.commonweb.mapper.PostMapper;
+import org.commonweb.mapper.UserMapper;
 import org.commonweb.serviceimpl.PostServiceImpl;
-import org.commonweb.repository.PostRepository;
-import org.commonweb.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -24,16 +24,15 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class PostServiceTest {
 
     @Mock
-    private UserRepository userRepository;
+    private UserMapper userMapper;
 
     @Mock
-    private PostRepository postRepository;
+    private PostMapper postMapper;
 
     @InjectMocks
     private PostServiceImpl postService;
@@ -58,9 +57,9 @@ class PostServiceTest {
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
 
-        // UserRepository 모킹 설정
+        // UserMapper 모킹 설정
         User user = new User(); // 혹은 User.builder().userId("userId").build(); 등으로 객체 생성
-        when(userRepository.findByUserId(anyString())).thenReturn(Optional.of(user));
+        when(userMapper.findByUserId(anyString())).thenReturn(Optional.of(user));
 
         // PostCreationRequest 객체 생성 및 초기화
         PostCreationRequest request = new PostCreationRequest();
@@ -68,12 +67,15 @@ class PostServiceTest {
         request.setContent("Test Content");
         // 필요한 경우, 다른 필드도 설정
 
-        // Mockito를 사용하여 postRepository.save 메서드가 호출될 때, 예상 결과를 설정
+        // Mockito를 사용하여 postMapper.createPost 메서드가 호출될 때, 예상 결과를 설정
         Post post = Post.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
                 .build();
-        when(postRepository.save(any(Post.class))).thenReturn(post);
+
+        // createPost는 void 반환 타입이므로 반환값 설정이 필요 없습니다.
+        // 대신 메서드 호출을 검증합니다.
+        doNothing().when(postMapper).createPost(any(Post.class));
 
         // 서비스 메서드 호출
         Post createdPost = postService.createPost(request);
@@ -82,13 +84,12 @@ class PostServiceTest {
         assertNotNull(createdPost);
         assertEquals(request.getTitle(), createdPost.getTitle());
         assertEquals(request.getContent(), createdPost.getContent());
+        verify(postMapper).createPost(any(Post.class)); // 메서드 호출 검증
     }
 
     @Test
     void findPostByIdTest() {
-        Post post = new Post(); // Post 객체 초기화
-
-        when(postRepository.findByUser_UserId("user123")).thenReturn(Collections.singletonList(post));
+        when(postMapper.findByUserId("user123")).thenReturn(Collections.singletonList(post));
 
         List<Post> foundPosts = postService.searchPostsByUserId("user123");
         assertFalse(foundPosts.isEmpty()); // 리스트가 비어있지 않은지 확인
@@ -97,13 +98,13 @@ class PostServiceTest {
 
     @Test
     void getAllPostsTest() {
-        List<Post> post = Arrays.asList(new Post(), new Post());
-        when(postRepository.findAll()).thenReturn(post);
+        List<Post> posts = Arrays.asList(new Post(), new Post());
+        when(postMapper.findAll()).thenReturn(posts);
 
         List<Post> result = postService.getAllPosts();
 
         assertNotNull(result);
-        assertEquals(post.size(), result.size());
+        assertEquals(posts.size(), result.size());
     }
 
     @Test
@@ -116,12 +117,11 @@ class PostServiceTest {
         List<Post> expectedPosts = Collections.singletonList(post);
 
         String keyword = "Test";
-        when(postRepository.findByTitleOrContent(keyword)).thenReturn(expectedPosts); // 스텁 설정을 수정합니다.
-        List<Post> foundPosts = postService.searchPostsByTitleOrContent(keyword); // 서비스 호출 부분을 수정합니다.
+        when(postMapper.findByTitleOrContent(keyword)).thenReturn(expectedPosts);
+
+        List<Post> foundPosts = postService.searchPostsByTitleOrContent(keyword);
 
         // 검증 부분을 수정합니다. getContent() 메서드 호출을 제거합니다.
         assertTrue(foundPosts.stream().anyMatch(p -> p.getTitle().contains(keyword) || p.getContent().contains(keyword)));
     }
-
-
 }

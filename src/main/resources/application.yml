@@ -3,16 +3,23 @@ spring:
     url: jdbc:mysql://localhost:3306/MyPJDB
     username: root
     password: 1234
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: update
+    driver-class-name: com.mysql.cj.jdbc.Driver
+#  jpa:
+#    show-sql: true
+#    hibernate:
+#      ddl-auto: update
 server:
   port: 8080
 
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: org.commonweb.entity
+
 logging:
   level:
-    org.springframework.web: DEBUG
+    root: ERROR   # 모든 로그에 대해 기본 로그 레벨을 설정합니다.
+    org.springframework: WARN   # Spring 관련 로그 레벨을 WARN으로 설정합니다.
+    org.commonweb: INFO   # org.commonweb 패키지에 대한 로그 레벨을 INFO로 설정합니다.
 
 jwt:
   secret: iGj2i-j0ku-XCRTyOAWyQATsqvHRP3ePGan6e9YvQR8WSyLoS8MpWw2ojvhgMx8qTsXWMs-DGJiSs2vKQhHBqA
