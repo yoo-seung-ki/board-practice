@@ -1,7 +1,9 @@
 <template>
   <v-app id="inspire">
     <v-app-bar flat>
+
       <v-container class="mx-auto d-flex align-center justify-center">
+
         <v-avatar
           class="me-4"
           color="grey-darken-1"
@@ -14,6 +16,8 @@
           :text="link"
           variant="text"
         ></v-btn>
+
+        <v-btn @click="goToHome">Back to Home</v-btn>
 
         <v-spacer></v-spacer>
 
@@ -42,6 +46,7 @@
                   :key="n"
                   :title="`List Item ${n}`"
                   link
+                  @click="navigateToListItem(n)"
                 ></v-list-item>
 
                 <v-divider class="my-2"></v-divider>
@@ -60,7 +65,7 @@
               min-height="70vh"
               rounded="lg"
             >
-              <!--  -->
+              <router-view></router-view> <!-- 동적으로 컴포넌트를 표시하는 영역 -->
             </v-sheet>
           </v-col>
         </v-row>
@@ -69,8 +74,35 @@
   </v-app>
 </template>
 
+
 <script setup>
-import { ref } from 'vue';
+import { ref,onMounted, onUnmounted, getCurrentInstance  } from 'vue';
+import { useRouter } from 'vue-router';
+
+const { emit } = getCurrentInstance();
+const router = useRouter();
+
+const goToHome = () => {
+  router.push('/');
+};
+
+const navigateToListItem = (itemNumber) => {
+  if (itemNumber === 1) {
+    router.push('/ConstrainedFrame/posts');
+  } else if (itemNumber === 2) {
+    router.push('/ConstrainedFrame/board');
+  }
+};
+
+onMounted(() => {
+  // 컴포넌트가 마운트될 때 네비게이션 바를 숨김
+  emit('toggle-nav', false);
+});
+
+onUnmounted(() => {
+  // 컴포넌트가 언마운트될 때 네비게이션 바를 다시 표시
+  emit('toggle-nav', true);
+});
 
 const links = ref([
   'Dashboard',

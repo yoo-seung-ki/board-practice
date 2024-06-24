@@ -20,8 +20,9 @@ public class CodeMerger2 {
             Files.walkFileTree(Paths.get(srcDir), new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    // Java와 리액트 소스 파일을 모두 대상으로 함
+                    // JavaScript 와 Json 과 VUE 소스 파일을 대상으로 함
                     if (file.toString().endsWith(".vue")
+                            || file.toString().endsWith(".json")
                             || file.toString().endsWith(".js")) {
                         allLines.addAll(Files.readAllLines(file));
                         allLines.add("\n"); // 파일 간 구분을 위해 빈 줄 추가

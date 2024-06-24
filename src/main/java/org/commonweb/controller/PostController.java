@@ -53,7 +53,7 @@ public class PostController {
         return ResponseEntity.ok(postResponse);
     }
 
-    @GetMapping
+    @GetMapping("/posts")
     public ResponseEntity<List<PostResponse>> getAllPosts() {
         List<Post> posts = postService.getAllPosts();
         List<PostResponse> postResponses = posts.stream()

@@ -1,12 +1,21 @@
 <template>
   <div id="app">
-    <v-btn @click="$router.push('/ExampleComponent')">Go to Example Component</v-btn>
-    <v-btn @click="$router.push('/ConstrainedFrame')">Go to ConstrainedFrame</v-btn>
-    <router-view />
+    <NavigationBar v-if="showNav" />
+    <router-view @toggle-nav="toggleNav" />
   </div>
 </template>
 
 <script setup>
+
+import { ref } from 'vue';
+import NavigationBar from './components/NavigationBar.vue';
+
+const showNav = ref(true);
+
+function toggleNav(show) {
+  showNav.value = show;
+}
+
 </script>
 
 <style>
