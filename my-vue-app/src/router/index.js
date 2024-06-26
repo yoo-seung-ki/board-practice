@@ -3,6 +3,9 @@ import ExampleComponent from '../components/ExampleComponent.vue';
 import ConstrainedFrame from '../components/ConstrainedFrame.vue';
 import GetPosts from '../components/GetPosts.vue'; // 변경된 컴포넌트 이름
 import BoardComponent from '../components/BoardComponent.vue'; // 새 컴포넌트 추가
+import TextEncodeComponent from '../components/TextEncodeComponent.vue';
+import DefaultView from '../components/DefaultView.vue'; // 새 컴포넌트 추가
+
 
 const routes = [
   {
@@ -11,7 +14,7 @@ const routes = [
     component: ExampleComponent,
   },
   {
-    path: '/ConstrainedFrame',
+    path: '/constrainedframe',
     name: 'ConstrainedFrame',
     component: ConstrainedFrame,
     children: [
@@ -25,7 +28,17 @@ const routes = [
             name: 'BoardComponent',
             component: BoardComponent, // 새 경로 추가
           },
+          {
+            path: 'encode',
+            name: 'TextEncodeComponent',
+            component: TextEncodeComponent,
+          },
         ],
+  },
+  {
+    path: '/defaultview',
+    name: 'DefaultView',
+    component: DefaultView,
   },
   /*{
     path: '/posts',

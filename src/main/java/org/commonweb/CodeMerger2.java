@@ -16,22 +16,31 @@ public class CodeMerger2 {
 
         List<String> allLines = new ArrayList<>();
 
-        for(String srcDir : srcDirs) {
-            Files.walkFileTree(Paths.get(srcDir), new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    // JavaScript 와 Json 과 VUE 소스 파일을 대상으로 함
-                    if (file.toString().endsWith(".vue")
-                            || file.toString().endsWith(".json")
-                            || file.toString().endsWith(".js")) {
-                        allLines.addAll(Files.readAllLines(file));
-                        allLines.add("\n"); // 파일 간 구분을 위해 빈 줄 추가
+        for (String srcDir : srcDirs) {
+            try {
+                Files.walkFileTree(Paths.get(srcDir), new SimpleFileVisitor<Path>() {
+                    @Override
+                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                        // JavaScript 와 Json 과 VUE 소스 파일을 대상으로 함
+                        if (file.toString().endsWith(".vue")
+                                || file.toString().endsWith(".json")
+                                || file.toString().endsWith(".js")) {
+                            allLines.add("/* File: " + file.toString() + " */"); // 파일 이름 추가
+                            allLines.addAll(Files.readAllLines(file));
+                            allLines.add("\n"); // 파일 간 구분을 위해 빈 줄 추가
+                        }
+                        return FileVisitResult.CONTINUE;
                     }
-                    return FileVisitResult.CONTINUE;
-                }
-            });
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
-        Files.write(Paths.get(outputFile), allLines, StandardOpenOption.CREATE);
+        try {
+            Files.write(Paths.get(outputFile), allLines, StandardOpenOption.CREATE);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

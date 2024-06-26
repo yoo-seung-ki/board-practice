@@ -16,7 +16,7 @@
 
 <script setup>
 
-import { ref, onMounted, onUnmounted, getCurrentInstance } from 'vue';
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 
@@ -34,7 +34,6 @@ const fetchUsers = async () => {
   }
 };
 
-const { emit } = getCurrentInstance();
 const router = useRouter();
 
 const goToHome = () => {
@@ -43,12 +42,8 @@ const goToHome = () => {
 
 onMounted(() => {
   fetchUsers();
-  emit('toggle-nav', false); // 네비게이션 바를 숨김
 });
 
-onUnmounted(() => {
-  emit('toggle-nav', true); // 네비게이션 바를 다시 표시
-});
 
 </script>
 

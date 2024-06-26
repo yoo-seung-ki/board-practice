@@ -1,9 +1,13 @@
 <template>
   <v-app id="inspire">
+       <v-app-bar flat>
+         <v-btn @click="$router.push('/ExampleComponent')">Example Component</v-btn>
+         <v-btn @click="$router.push('/ConstrainedFrame')">ConstrainedFrame</v-btn>
+         <v-btn @click="$router.push('/defaultview')">Default View</v-btn>
+         <v-btn @click="goToHome">Home</v-btn>
+       </v-app-bar>
     <v-app-bar flat>
-
       <v-container class="mx-auto d-flex align-center justify-center">
-
         <v-avatar
           class="me-4"
           color="grey-darken-1"
@@ -16,8 +20,6 @@
           :text="link"
           variant="text"
         ></v-btn>
-
-        <v-btn @click="goToHome">Back to Home</v-btn>
 
         <v-spacer></v-spacer>
 
@@ -76,33 +78,10 @@
 
 
 <script setup>
-import { ref,onMounted, onUnmounted, getCurrentInstance  } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-const { emit } = getCurrentInstance();
 const router = useRouter();
-
-const goToHome = () => {
-  router.push('/');
-};
-
-const navigateToListItem = (itemNumber) => {
-  if (itemNumber === 1) {
-    router.push('/ConstrainedFrame/posts');
-  } else if (itemNumber === 2) {
-    router.push('/ConstrainedFrame/board');
-  }
-};
-
-onMounted(() => {
-  // 컴포넌트가 마운트될 때 네비게이션 바를 숨김
-  emit('toggle-nav', false);
-});
-
-onUnmounted(() => {
-  // 컴포넌트가 언마운트될 때 네비게이션 바를 다시 표시
-  emit('toggle-nav', true);
-});
 
 const links = ref([
   'Dashboard',
@@ -110,6 +89,27 @@ const links = ref([
   'Profile',
   'Updates',
 ]);
+
+const goToHome = () => {
+  router.push('/');
+};
+
+const navigateToListItem = (itemNumber) => {
+  if (itemNumber === 1) {
+    router.push('/constrainedframe/posts');
+  } else if (itemNumber === 2) {
+    router.push('/constrainedframe/board');
+  } else if (itemNumber === 3) {
+    router.push('/constrainedframe/encode');
+  } else {
+    if (router.currentRoute.value.path === '/constrainedframe') {
+      router.go(0); // 현재 경로와 동일하면 페이지 새로고침
+    } else {
+      router.push('/constrainedframe');
+    }
+  }
+};
+
 </script>
 
 <style scoped>
