@@ -43,9 +43,13 @@
       </div>
     </div>
 
+    <!-- 캐릭터 능력치 정보 불러오기 버튼-->
     <div class="my-3">
         <v-btn @click="fetchCharacterStatus">캐릭터 능력치 정보 불러오기</v-btn>
     </div>
+
+    <!-- CharacterGrid 컴포넌트 사용 -->
+        <CharacterGrid v-if="characterStatus" :character="characterStatus" />
 
     <!-- 에러 메시지 표시 -->
     <v-alert v-if="error" type="error" class="mt-3">
@@ -58,15 +62,16 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import CharacterGrid from './CharacterGrid.vue';
 
-const defaultApiKey = 'AWQN8gt73TXignmC6u7KKuP1eqscD6Ei'; // 기본 API 키
-const apiKey = ref(defaultApiKey);
+const apiKey = ref(process.env.VUE_APP_API_KEY || '');
 const servers = ref([]);
 const selectedServer = ref('');
 const characterNickname = ref(''); // 캐릭터 닉네임
 const error = ref(null);
 const characterImages = ref([]);
 const characterId = ref(''); // 캐릭터 ID를 저장할 변수
+const characterStatus = ref({});
 
 const selectServers = async () => {
   if (!apiKey.value) return; // API 키가 없으면 요청을 보내지 않음
@@ -116,6 +121,7 @@ const fetchCharacterStatus = async () => {
     try {
         const response = await axios.get(`api/df/servers/${selectedServer.value}/characters/${characterId.value}/status?apikey=${apiKey.value}`);
         console.log('Character Status : ', response.data);
+        characterStatus.value = response.data;
         error.value = null;
     } catch(err) {
         console.error('Error fetching character status:', err);
@@ -130,7 +136,9 @@ const updateApiKey = () => {
 };
 
 onMounted(() => {
-  selectServers();
+  if (apiKey.value) {
+    selectServers();
+  }
 });
 
 </script>
