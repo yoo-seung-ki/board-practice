@@ -49,7 +49,7 @@
     </div>
 
     <!-- CharacterGrid 컴포넌트 사용 -->
-        <CharacterGrid v-if="characterStatus" :character="characterStatus" />
+    <CharacterGrid v-if="characterStatus" :character="characterStatus" />
 
     <!-- 에러 메시지 표시 -->
     <v-alert v-if="error" type="error" class="mt-3">
@@ -65,6 +65,7 @@ import axios from 'axios';
 import CharacterGrid from './CharacterGrid.vue';
 
 const apiKey = ref(process.env.VUE_APP_API_KEY || '');
+const allCharactersID = ref([]);
 const servers = ref([]);
 const selectedServer = ref('');
 const characterNickname = ref(''); // 캐릭터 닉네임
@@ -72,6 +73,22 @@ const error = ref(null);
 const characterImages = ref([]);
 const characterId = ref(''); // 캐릭터 ID를 저장할 변수
 const characterStatus = ref({});
+
+
+const fetchAllCharactersID = async() => {
+    if (!apiKey.value) return; // API 키가 없으면 요청을 보내지 않음
+
+    try {
+        const response = await axios.get(`/api/df/jobs?apikey=${apiKey.value}`);
+        allCharactersID.value = response.data.rows;
+        console.log("allCharacterID : ");
+        console.log(allCharactersID.value);
+        error.value = null;
+    } catch (err) {
+        console.error('Error fetching AllCharactersID : ' , err);
+        error.value = 'Error Error fetching AllCharactersID. Please check your API key.';
+    }
+}
 
 const selectServers = async () => {
   if (!apiKey.value) return; // API 키가 없으면 요청을 보내지 않음
@@ -96,7 +113,7 @@ const fetchCharacterInfo = async () => {
     const response = await axios.get(`api/df/servers/${selectedServer.value}/characters?characterName=${characterNickname.value}&apikey=${apiKey.value}`);
     console.log('Character Info : ', response.data); // 응답 데이터 확인용 콘솔 출력
     characterId.value  = response.data.rows[0].characterId;
-    fetchCharacterImages(characterId);
+    fetchCharacterImages(characterId.value);
     error.value = null; // 성공 시 에러 메시지 초기화
   } catch (err) {
     console.error('Error fetching character info:', err);
@@ -105,14 +122,14 @@ const fetchCharacterInfo = async () => {
 };
 
 
-const fetchCharacterImages = () => {
-    if(!characterId.value) {
+const fetchCharacterImages = (characterId) => {
+    if(!characterId) {
         error.value = 'Character ID is required to fetch images';
         return;
     }
   const serverId = selectedServer.value;
   characterImages.value = [1, 2, 3].map(zoom =>
-    `https://img-api.neople.co.kr/df/servers/${serverId}/characters/${characterId.value}?zoom=${zoom}`
+    `https://img-api.neople.co.kr/df/servers/${serverId}/characters/${characterId}?zoom=${zoom}`
   );
 };
 
@@ -138,6 +155,7 @@ const updateApiKey = () => {
 onMounted(() => {
   if (apiKey.value) {
     selectServers();
+    fetchAllCharactersID();
   }
 });
 
