@@ -1,7 +1,6 @@
-
 <template>
   <v-container class="ma-5">
-    <!-- 텍스트박스 추가 -->
+    <!-- API 키 입력 텍스트박스 -->
     <v-text-field
       v-model="apiKey"
       label="Enter API Key"
@@ -9,19 +8,18 @@
       class="mb-1"
     ></v-text-field>
 
-    <!-- API Key 변경 버튼 추가 -->
+    <!-- API Key 변경 버튼 -->
     <v-btn class="mb-5" @click="updateApiKey">API Key 변경</v-btn>
 
-    <!-- 서버 선택 드롭다운 메뉴 추가 -->
+    <!-- 서버 선택 드롭다운 메뉴 -->
     <v-select
       v-model="selectedServer"
-      :items="servers"
+      :items="serversWithAll"
       item-title="serverName"
       item-value="serverId"
-      label="서버 선택"
+      label="서버 선택(전체를 선택하면 모든 서버 검색)"
       outlined
       class="my-3"
-      :disabled="!servers.length"
     ></v-select>
 
     <!-- 캐릭터 닉네임 입력 텍스트박스 -->
@@ -35,146 +33,117 @@
     <!-- 요청 버튼 -->
     <v-btn class="api-btn my-3" @click="fetchCharacterInfo">캐릭터 기본정보 및 이미지 불러오기</v-btn>
 
-    <!-- 캐릭터 이미지 표시 -->
-    <div v-if="characterImages.length" class="mt-5">
-      <h3>Character Images</h3>
-      <div v-for="(image, index) in characterImages" :key="index" class="mb-3">
-        <img :src="image" :alt="'Character Image ' + (index + 1)" />
-      </div>
-    </div>
-
-    <!-- 캐릭터 능력치 정보 불러오기 버튼-->
-    <div class="my-3">
-        <v-btn @click="fetchCharacterStatus">캐릭터 능력치 정보 불러오기</v-btn>
-    </div>
-
-    <!-- CharacterGrid 컴포넌트 사용 -->
-    <CharacterGrid v-if="characterStatus" :character="characterStatus" />
+    <!-- CharacterSearchResults 컴포넌트 사용 -->
+    <CharacterSearchResults v-if="searchResults.length" :searchResults="searchResults" />
 
     <!-- 에러 메시지 표시 -->
     <v-alert v-if="error" type="error" class="mt-3">
       {{ error }}
     </v-alert>
-
   </v-container>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
-import CharacterGrid from './CharacterGrid.vue';
+import CharacterSearchResults from './CharacterSearchResults.vue';
 
 const apiKey = ref(process.env.VUE_APP_API_KEY || '');
-const allCharactersID = ref([]);
 const servers = ref([]);
 const selectedServer = ref('');
-const characterNickname = ref(''); // 캐릭터 닉네임
+const characterNickname = ref('');
 const error = ref(null);
-const characterImages = ref([]);
-const characterId = ref(''); // 캐릭터 ID를 저장할 변수
-const characterStatus = ref({});
+const searchResults = ref([]);
 
+const serversWithAll = computed(() => [
+  { serverId: 'all', serverName: '전체' },
+  ...servers.value
+]);
 
-const fetchAllCharactersID = async() => {
-    if (!apiKey.value) return; // API 키가 없으면 요청을 보내지 않음
-
-    try {
-        const response = await axios.get(`/api/df/jobs?apikey=${apiKey.value}`);
-        allCharactersID.value = response.data.rows;
-        console.log("allCharacterID : ");
-        console.log(allCharactersID.value);
-        error.value = null;
-    } catch (err) {
-        console.error('Error fetching AllCharactersID : ' , err);
-        error.value = 'Error Error fetching AllCharactersID. Please check your API key.';
-    }
-}
-
-const selectServers = async () => {
-  if (!apiKey.value) return; // API 키가 없으면 요청을 보내지 않음
+const fetchServers = async () => {
+  if (!apiKey.value) return;
 
   try {
     const response = await axios.get(`/api/df/servers?apikey=${apiKey.value}`);
     servers.value = response.data.rows;
-    error.value = null; // Clear error if fetch is successful
+    error.value = null;
   } catch (err) {
     console.error('Error fetching server data:', err);
-    error.value = 'Error fetching server data. Please check your API key.';
+    error.value = '서버 데이터를 가져오는 중 오류가 발생했습니다. API 키를 확인하세요.';
   }
 };
 
 const fetchCharacterInfo = async () => {
-  if (!apiKey.value || !selectedServer.value || !characterNickname.value) {
-    error.value = 'API Key, Server, and Character Nickname are required';
+  if (!apiKey.value || !characterNickname.value) {
+    error.value = 'API Key와 Character Nickname은 필수 항목입니다.';
     return;
   }
 
   try {
-    const response = await axios.get(`api/df/servers/${selectedServer.value}/characters?characterName=${characterNickname.value}&apikey=${apiKey.value}`);
-    console.log('Character Info : ', response.data); // 응답 데이터 확인용 콘솔 출력
-    characterId.value  = response.data.rows[0].characterId;
-    fetchCharacterImages(characterId.value);
-    error.value = null; // 성공 시 에러 메시지 초기화
+    error.value = null;
+    searchResults.value = [];
+
+    if (selectedServer.value && selectedServer.value !== 'all') {
+      const response = await axios.get(`api/df/servers/${selectedServer.value}/characters?characterName=${encodeURIComponent(characterNickname.value)}&apikey=${apiKey.value}`);
+      const characters = response.data.rows.map(character => ({
+        characterId: character.characterId, // characterId 추가
+        characterName: character.characterName,
+        jobGrowName: character.jobGrowName,
+        fame: character.fame,
+        level: character.level,
+        serverName: getServerName(selectedServer.value),
+        serverId: selectedServer.value
+      }));
+      searchResults.value.push(...characters);
+    } else {
+      for (const server of servers.value) {
+        const response = await axios.get(`api/df/servers/${server.serverId}/characters?characterName=${encodeURIComponent(characterNickname.value)}&apikey=${apiKey.value}`);
+        const characters = response.data.rows.map(character => ({
+          characterId: character.characterId, // characterId 추가
+          characterName: character.characterName,
+          jobGrowName: character.jobGrowName,
+          fame: character.fame,
+          level: character.level,
+          serverName: server.serverName,
+          serverId: server.serverId
+        }));
+        searchResults.value.push(...characters);
+      }
+    }
   } catch (err) {
     console.error('Error fetching character info:', err);
-    error.value = 'Error fetching character info. Please check your input values and API key.';
+    error.value = '캐릭터 정보를 가져오는 중 오류가 발생했습니다. 입력 값을 확인하세요.';
   }
 };
 
-
-const fetchCharacterImages = (characterId) => {
-    if(!characterId) {
-        error.value = 'Character ID is required to fetch images';
-        return;
-    }
-  const serverId = selectedServer.value;
-  characterImages.value = [1, 2, 3].map(zoom =>
-    `https://img-api.neople.co.kr/df/servers/${serverId}/characters/${characterId}?zoom=${zoom}`
-  );
+const getServerName = (serverId) => {
+  const server = servers.value.find(server => server.serverId === serverId);
+  return server ? server.serverName : serverId;
 };
 
-
-const fetchCharacterStatus = async () => {
-    try {
-        const response = await axios.get(`api/df/servers/${selectedServer.value}/characters/${characterId.value}/status?apikey=${apiKey.value}`);
-        console.log('Character Status : ', response.data);
-        characterStatus.value = response.data;
-        error.value = null;
-    } catch(err) {
-        console.error('Error fetching character status:', err);
-        error.value = 'Error fetching character status. Please check your input values and API key.';
-    }
-}
-
-
-
 const updateApiKey = () => {
-  selectServers();
+  fetchServers();
 };
 
 onMounted(() => {
   if (apiKey.value) {
-    selectServers();
-    fetchAllCharactersID();
+    fetchServers();
   }
 });
-
 </script>
 
 <style scoped>
-/* 스타일을 여기에 추가하세요 */
-
 .my-3 {
   margin-top: 1rem;
   margin-bottom: 1rem;
 }
 
 .mb-1 {
-  margin-bottom: 0.5rem; /* 텍스트박스와 버튼 사이 간격을 좁힘 */
+  margin-bottom: 0.5rem;
 }
 
 .mb-5 {
-  margin-bottom: 3rem !important; /* 버튼과 셀렉트 박스 사이 간격을 넓힘 */
+  margin-bottom: 3rem !important;
 }
 
 .mt-3 {
