@@ -11,7 +11,7 @@ public class ProjectCodeMerger {
         String[] srcDirs = {
                 "C:\\Users\\sgsg9\\Desktop\\MyPJ\\src", // 프로젝트 Java 소스 코드 디렉토리 경로
         };
-        String outputFile = "C:\\Users\\sgsg9\\Desktop\\MyPJCodeText\\MyPJText.txt"; // 결과를 저장할 파일 경로
+        String outputFile = "C:\\Users\\sgsg9\\Desktop\\MyPJCodeText\\MyPJJavaText.txt"; // 결과를 저장할 파일 경로
 
         List<String> allLines = new ArrayList<>();
 
