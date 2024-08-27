@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slow Motion Video</title>
+</head>
+<body>
+<h1>5x Slow Motion Video</h1>
+<video id="myVideo" width="640" height="360" controls>
+    <source src="../resources/video/gwangryong.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+</video>
+
+<script>
+    // Get the video element
+    const video = document.getElementById('myVideo');
+
+    // Set the playback rate to 0.2 (5x slower)
+    video.playbackRate = 0.2;
+</script>
+</body>
+</html>
