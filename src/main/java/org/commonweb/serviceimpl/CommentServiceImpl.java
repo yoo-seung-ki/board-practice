@@ -22,7 +22,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-
 public class CommentServiceImpl implements CommentService {
 
     private final UserMapper userMapper;

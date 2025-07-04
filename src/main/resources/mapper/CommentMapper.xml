@@ -15,7 +15,7 @@
     <select id="findCommentsByPostId" parameterType="long" resultType="org.commonweb.entity.Comment">
         SELECT * FROM comments WHERE post_id = #{postId}
     </select>
-    <select id="findCommentsByUserId" parameterType="long" resultType="org.commonweb.entity.Comment">
+    <select id="findCommentsByUserId" parameterType="String" resultType="org.commonweb.entity.Comment">
         SELECT * FROM comments WHERE user_id = #{userId}
     </select>
     <select id="getAllComments" resultType="org.commonweb.entity.Comment">

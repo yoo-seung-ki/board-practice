@@ -23,6 +23,11 @@
     </parent>
 
     <dependencies>
+        <dependency> <!-- 화면 좌표 찾기 및 반복클릭 하려고 넣은 의존성이므로 나중에 삭제 -->
+            <groupId>com.github.kwhat</groupId>
+            <artifactId>jnativehook</artifactId>
+            <version>2.2.2</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>

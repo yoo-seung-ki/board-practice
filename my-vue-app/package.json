@@ -5,12 +5,14 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "fetch-skills": "node scripts/fetchSkills.js"
   },
   "dependencies": {
     "@vue/compiler-sfc": "^3.4.31",
     "axios": "^1.7.2",
     "core-js": "^3.8.3",
+    "dotenv": "^16.4.7",
     "vue": "^3.4.29",
     "vue-router": "^4.3.3",
     "vuetify": "^3.3.2"

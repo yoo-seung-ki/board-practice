@@ -31,8 +31,13 @@
     </insert>
     <update id="updateUser" parameterType="org.commonweb.entity.User">
         UPDATE users
-        SET user_id = #{userId}, password = #{password}, email = #{email}, name = #{name}, phone_number = #{phoneNumber}, user_updated_at = #{userUpdatedAt}
-        WHERE user_id = #{userId}
+        SET user_id = #{userId},
+            password = #{password},
+            email = #{email},
+            name = #{name},
+            phone_number = #{phoneNumber},
+            user_updated_at = #{userUpdatedAt}
+        WHERE id = #{id}
     </update>
     <delete id="deleteUser">
         DELETE FROM users WHERE id = #{id}

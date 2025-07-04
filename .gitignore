@@ -39,3 +39,6 @@ build/
 
 # Secret configuration
 application.yml
+
+#node_modules 무시
+node_modules/

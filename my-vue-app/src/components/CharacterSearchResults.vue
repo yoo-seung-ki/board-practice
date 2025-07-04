@@ -15,7 +15,7 @@
             <div><strong>서버:</strong> {{ character.serverName }}</div>
           </v-card-text>
           <v-card-actions>
-            <v-btn @click="viewDetails(character.serverId, character.characterId)">View Details</v-btn>
+            <v-btn @click="viewDetails(character.serverId, character.characterId, character.serverName)">View Details</v-btn>
           </v-card-actions>
         </v-card>
       </v-col>
@@ -36,9 +36,13 @@ const props = defineProps({
 
 const router = useRouter();
 
-const viewDetails = (serverId, characterId) => {
-  console.log(`Navigating to details of characterId: ${characterId} on serverId: ${serverId}`);
-  router.push({ name: 'CharacterDetails', params: { serverId, characterId } });
+const viewDetails = (serverId, characterId, serverName) => {
+  console.log(`Navigating to details of characterId: ${characterId} on serverId: ${serverId} and serverName:${serverName}`);
+  router.push({
+    name: 'CharacterDetails',
+    params: { serverId, characterId },
+    query : { serverName }
+  });
 };
 </script>
 
